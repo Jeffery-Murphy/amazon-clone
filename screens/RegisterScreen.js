@@ -6,19 +6,50 @@ import {
   Image,
   TextInput,
   KeyboardAvoidingView,
-  Pressable
+  Pressable,
+  Alert
 } from "react-native";
 import React, { useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from '@expo/vector-icons';
+import axios from "axios";
 
 const RegisterScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
   const navigation = useNavigation();
+
+  const handleRegister = () => {
+    const user = {
+      name: name,
+      email: email,
+      password: password,
+    };
+
+    // send a POST  request to the backend API to register the user
+    axios
+      .post("http://10.0.2.2:8000/register", user)
+      .then((response) => {
+        console.log(response);
+        Alert.alert(
+          "Registration successful",
+          "You have been registered Successfully"
+        );
+        setName("");
+        setEmail("");
+        setPassword("");
+      })
+      .catch((error) => {
+        Alert.alert(
+          "Registration Error",
+          "An error occurred while registering"
+        );
+        console.log("registration failed", error);
+      });
+  };
   return (
     <SafeAreaView style={styles.container}>
       <View>
@@ -60,9 +91,9 @@ const RegisterScreen = () => {
             
             <Ionicons name="person-sharp" size={24} color="gray" />
             <TextInput
-              value={username}
-              onChangeText={(text)=>setUsername(text)}
-              placeholder="Enter Username"
+              value={name}
+              onChangeText={(text)=>setName(text)}
+              placeholder="Enter name"
               style={{ color: "gray", marginVertical: 5, width: 345 }}
             />
           </View>
@@ -118,6 +149,7 @@ const RegisterScreen = () => {
               padding: 15,
 
             }}
+            onPress={handleRegister}
           >
             <Text style={{textAlign: "center", color: 'white', fontSize: 16, fontWeight: '500'}}>Register</Text>
           </Pressable>

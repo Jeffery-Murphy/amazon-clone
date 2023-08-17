@@ -8,15 +8,53 @@ import {
   KeyboardAvoidingView,
   Pressable
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigation = useNavigation();
+  useEffect(() => {
+    const checkLoginStatus = async() => {
+      try {
+        const token = await AsyncStorage.getItem("authToken");
+    if(token) {
+      navigation.replace("Main")
+    }
+      } catch (error) {
+        console.log("Error Message", error);
+      }
+    }
+    checkLoginStatus()
+  }, [])
+  
+  const handleLogin = () => {
+    const user = {
+      email: email,
+      password: password,
+    };
+
+    // send a POST  request to the backend API to register the user
+    axios
+      .post("http://10.0.2.2:8000/login", user)
+      .then((response) => {
+        console.log(response);
+        const token = response.data.token;
+        AsyncStorage.setItem("authToken", token);
+        navigation.replace("Main")
+      })
+      .catch((error) => {
+        Alert.alert(
+          "Login failed, please try again",
+        );
+        console.log("Login failed", error);
+      });
+  };
   return (
     <SafeAreaView style={styles.container}>
       <View>
@@ -98,6 +136,7 @@ const LoginScreen = () => {
               padding: 15,
 
             }}
+            onPress={handleLogin}
           >
             <Text style={{textAlign: "center", color: 'white', fontSize: 16, fontWeight: '500'}}>Login</Text>
           </Pressable>
